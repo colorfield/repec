@@ -1,0 +1,9 @@
+repec.settings:
+  path: '/admin/config/repec/settings'
+  defaults:
+    _form: '\Drupal\repec\Form\SettingsForm'
+    _title: 'RePEc'
+  requirements:
+    _permission: 'administer site configuration'
+  options:
+    _admin_route: TRUE
