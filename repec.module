@@ -36,7 +36,7 @@ function repec_entity_insert(EntityInterface $entity) {
   assert($entity instanceof ContentEntityInterface);
   /** @var \Drupal\repec\RepecInterface $repec */
   $repec = \Drupal::service('repec');
-  if ($repec->isEnabled($entity->getEntityType())) {
+  if ($repec->isEnabled($entity)) {
     $repec->createTemplate($entity, Repec::TEMPLATE_WORKING_PAPER);
   }
 }
@@ -48,7 +48,7 @@ function repec_entity_update(EntityInterface $entity) {
   assert($entity instanceof ContentEntityInterface);
   /** @var \Drupal\repec\RepecInterface $repec */
   $repec = \Drupal::service('repec');
-  if ($repec->isEnabled($entity->getEntityType())) {
+  if ($repec->isEnabled($entity)) {
     $repec->updateTemplate($entity, Repec::TEMPLATE_WORKING_PAPER);
   }
 }
@@ -60,7 +60,92 @@ function repec_entity_delete(EntityInterface $entity) {
   assert($entity instanceof ContentEntityInterface);
   /** @var \Drupal\repec\RepecInterface $repec */
   $repec = \Drupal::service('repec');
-  if ($repec->isEnabled($entity->getEntityType())) {
+  if ($repec->isEnabled($entity)) {
     $repec->deleteTemplate($entity, Repec::TEMPLATE_WORKING_PAPER);
   }
+}
+
+/**
+ * Return RePEc's settings for an entity type bundle.
+ *
+ * @param string $setting
+ *   One of the repec_available_entity_bundle_settings(), e.g. 'enabled'.
+ *   If 'all' is passed, all available settings are returned.
+ * @param string $entity_type_id
+ *   The id of the entity type to return settings for.
+ * @param string $bundle
+ *   The id of the bundle to return settings for.
+ *
+ * @return string|array
+ *   The value of the given setting or an array of all settings.
+ */
+function repec_get_entity_bundle_settings($setting, $entity_type_id, $bundle) {
+  $config = \Drupal::configFactory()->getEditable('repec.settings');
+  $settings = unserialize($config->get('repec_bundle.' . $entity_type_id . '.' . $bundle));
+  if (empty($settings)) {
+    $settings = [];
+  }
+  $settings += repec_get_entity_bundle_setting_defaults();
+
+  if ($setting == 'all') {
+    return $settings;
+  }
+
+  return isset($settings[$setting]) ? $settings[$setting] : NULL;
+}
+
+/**
+ * Save RePEc's settings of an entity type bundle.
+ *
+ * @param array $settings
+ *   The repec_available_entity_bundle_settings().
+ * @param string $entity_type_id
+ *   The id of the entity type to set the settings for.
+ * @param string $bundle
+ *   The id of the bundle to set the settings for.
+ */
+function repec_set_entity_bundle_settings(array $settings, $entity_type_id, $bundle) {
+  $config = \Drupal::configFactory()->getEditable('repec.settings');
+  // Do not store default values.
+  foreach (repec_get_entity_bundle_setting_defaults() as $setting => $default_value) {
+    if (isset($settings[$setting]) && $settings[$setting] == $default_value) {
+      unset($settings[$setting]);
+    }
+  }
+  $config->set('repec_bundle.' . $entity_type_id . '.' . $bundle, serialize($settings));
+  $config->save();
+}
+
+/**
+ * Returns RePEc's entity type bundle available settings.
+ *
+ * @return array
+ *   List of entity bundle available settings.
+ */
+function repec_available_entity_bundle_settings() {
+  return [
+    'enabled',
+    'author_name',
+    'abstract',
+    'creation_date',
+    'file_url',
+    'keywords',
+  ];
+}
+
+/**
+ * Defines default values for RePEc settings.
+ *
+ * @return array
+ *   List of entity bundle default settings.
+ */
+function repec_get_entity_bundle_setting_defaults() {
+  $defaults = [];
+  $defaults['enabled'] = FALSE;
+  $defaults['author_name'] = '';
+  $defaults['abstract'] = '';
+  $defaults['creation_date'] = '';
+  $defaults['file_url'] = '';
+  $defaults['keywords'] = [];
+  return $defaults;
 }
