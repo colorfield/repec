@@ -1,0 +1,24 @@
+<?php
+
+/**
+ * @file
+ * Contains repec.module.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function repec_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help for the repec module.
+    case 'help.page.repec':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('RDF integration with Research Papers in Economics (RePEc)') . '</p>';
+      return $output;
+
+    default:
+  }
+}

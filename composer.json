@@ -1,0 +1,14 @@
+{
+  "name": "drupal/repec",
+  "type": "drupal-module",
+  "description": "RDF integration with Research Papers in Economics (RePEc)",
+  "keywords": ["Drupal"],
+  "license": "GPL-2.0+",
+  "homepage": "https://www.drupal.org/project/repec",
+  "minimum-stability": "dev",
+  "support": {
+    "issues": "https://www.drupal.org/project/issues/repec",
+    "source": "http://cgit.drupalcode.org/repec"
+  },
+  "require": { }
+}

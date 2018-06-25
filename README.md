@@ -1,2 +1,3 @@
-# repec
-Drupal 8 port of the RePEc module
+# RePEc
+
+RDF integration with [Research Papers in Economics](http://repec.org/) (RePEc) for Drupal 8.
