@@ -17,6 +17,9 @@ function repec_help($route_name, RouteMatchInterface $route_match) {
       $output = '';
       $output .= '<h3>' . t('About') . '</h3>';
       $output .= '<p>' . t('RDF integration with Research Papers in Economics (RePEc)') . '</p>';
+      // @todo translation
+      $output .= '<p>This module helps you create a repository for <a href="http://repec.org" target="_blank">Research Papers in Economics</a> (RePEc). A template is created an updated automatically when new content is added to a content type matched in the Paper Series. <br>
+                     RePEc is a collaborative effort of hundreds of volunteers in 82 countries to enhance the dissemination of research in Economics and related sciences. Collected papers are searchable from the <a href="http://ideas.repec.org" target="_blank">RePEc Ideas website.</a></p>';
       return $output;
 
     default:

@@ -34,42 +34,47 @@ class SettingsForm extends ConfigFormBase {
     $form['archive_code'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Archive code'),
-      '#description' => $this->t('This code must be registered and provided by RePEc. This has three letters.'),
+      '#description' => $this->t('This code must be registered and provided by RePEc. It has three letters. See https://ideas.repec.org/t/archivehandle.html'),
       '#maxlength' => 3,
       '#size' => 3,
       '#default_value' => $config->get('archive_code'),
+      '#required' => TRUE,
     ];
     $form['base_path'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Base path'),
-      '#description' => $this->t('This is the path for the main directory to store the template files. This is the directory to be checked by RePEc system. You must setup this path on the filesystem.'),
+      '#description' => $this->t('Path for the main directory to store the template files. This is the directory to be checked by RePEc system. It must be on the public filesystem.'),
       '#maxlength' => 254,
       '#size' => 64,
       '#default_value' => $config->get('base_path'),
+      '#required' => TRUE,
     ];
     $form['provider_name'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Provider name'),
-      '#description' => $this->t('This is the name of the provider institution (example: University of Southern California, Lusk Center for Real Estate).'),
+      '#description' => $this->t('Name of the provider institution (example: University of Southern California, Lusk Center for Real Estate).'),
       '#maxlength' => 200,
       '#size' => 64,
       '#default_value' => $config->get('provider_name'),
+      '#required' => TRUE,
     ];
     $form['provider_homepage'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Provider homepage'),
-      '#description' => $this->t('This is the homepage of the provider institution (example: http://lusk.usc.edu).'),
+      '#description' => $this->t('Homepage of the provider institution (example: http://lusk.usc.edu).'),
       '#maxlength' => 250,
       '#size' => 64,
       '#default_value' => $config->get('provider_homepage'),
+      '#required' => TRUE,
     ];
     $form['provider_institution'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Provider institution'),
-      '#description' => $this->t('This is the provider institution (example: RePEc:edi:lcuscus).'),
+      '#description' => $this->t('(example: RePEc:edi:lcuscus).'),
       '#maxlength' => 200,
       '#size' => 64,
       '#default_value' => $config->get('provider_institution'),
+      '#required' => TRUE,
     ];
     $form['maintainer_name'] = [
       '#type' => 'textfield',
@@ -77,11 +82,13 @@ class SettingsForm extends ConfigFormBase {
       '#maxlength' => 160,
       '#size' => 64,
       '#default_value' => $config->get('maintainer_name'),
+      '#required' => TRUE,
     ];
     $form['maintainer_email'] = [
       '#type' => 'email',
       '#title' => $this->t('Maintainer email'),
       '#default_value' => $config->get('maintainer_email'),
+      '#required' => TRUE,
     ];
     return parent::buildForm($form, $form_state);
   }

@@ -1,7 +1,5 @@
-repec.repec_settings:
+repec.settings:
   title: 'RePEc'
-  route_name: repec.repec_settings
+  route_name: repec.settings
   description: 'RePEc system wide configuration.'
-  parent: system.admin_config_system
-  weight: 99
-
+  parent: system.admin_config_services
