@@ -146,6 +146,6 @@ function repec_get_entity_bundle_setting_defaults() {
   $defaults['abstract'] = '';
   $defaults['creation_date'] = '';
   $defaults['file_url'] = '';
-  $defaults['keywords'] = [];
+  $defaults['keywords'] = '';
   return $defaults;
 }

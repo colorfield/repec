@@ -1,0 +1,5 @@
+entity.node_type.repec:
+  route_name: entity.node_type.repec
+  base_route: entity.node_type.edit_form
+  title: 'RePEc'
+  weight: 99

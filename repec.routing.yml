@@ -4,6 +4,14 @@ repec.settings:
     _form: '\Drupal\repec\Form\SettingsForm'
     _title: 'RePEc'
   requirements:
-    _permission: 'administer site configuration'
+    _permission: 'administer repec'
   options:
     _admin_route: TRUE
+
+entity.node_type.repec:
+  path: '/admin/structure/types/manage/{node_type}/repec'
+  defaults:
+    _title: 'RePEc'
+    _form: '\Drupal\repec\Form\NodeTypeSettingsForm'
+  requirements:
+    _permission: 'administer repec'

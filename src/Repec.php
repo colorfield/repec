@@ -66,8 +66,8 @@ class Repec implements RepecInterface {
   /**
    * {@inheritdoc}
    */
-  public function isEnabled($entity_type) {
-    // TODO: Implement isEnabled() method.
+  public function isEnabled(ContentEntityInterface $entity) {
+    return repec_get_entity_bundle_settings('enabled', $entity->getEntityTypeId(), $entity->bundle());
   }
 
 }
