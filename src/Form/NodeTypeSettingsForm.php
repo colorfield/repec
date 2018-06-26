@@ -69,6 +69,7 @@ class NodeTypeSettingsForm extends FormBase {
       '#title' => t('Templates directory'),
       '#description' => t('Directory for the templates. It must have exactly six letters (example: wpaper).'),
       '#maxlength' => 6,
+      '#size' => 6,
       '#default_value' => $repec->getEntityBundleSettings('serie_directory', 'node', $node_type),
       '#states' => [
         'visible' => [
@@ -117,6 +118,18 @@ class NodeTypeSettingsForm extends FormBase {
     ];
 
     return $form;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function validateForm(array &$form, FormStateInterface $form_state) {
+    parent::validateForm($form, $form_state);
+    // @todo validate selected field types
+    $directory = $form_state->getValue('serie_directory');
+    if (strlen($directory) !== 6) {
+      $form_state->setErrorByName('serie_directory', t('Serie directory must have exactly 6 letters.'));
+    }
   }
 
   /**

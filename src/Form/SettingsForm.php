@@ -43,7 +43,7 @@ class SettingsForm extends ConfigFormBase {
     $form['base_path'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Base path'),
-      '#description' => $this->t('Path for the main directory to store the template files. This is the directory to be checked by RePEc system. It must be on the public file system (public://, by default /sites/default/files).'),
+      '#description' => $this->t('Path for the main directory to store the template files. It will be created on the public file system (public://, by default /sites/default/files). Do not include a trailing slash (example: RePEC).'),
       '#maxlength' => 254,
       '#size' => 64,
       '#default_value' => $config->get('base_path'),
@@ -97,8 +97,12 @@ class SettingsForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
-    // @todo validate provider homepage
     parent::validateForm($form, $form_state);
+    // @todo validate provider homepage
+    $archiveCode = $form_state->getValue('archive_code');
+    if (strlen($archiveCode) !== 3) {
+      $form_state->setErrorByName('archive_code', t('Archive code must have exactly 3 letters.'));
+    }
   }
 
   /**
