@@ -66,8 +66,8 @@ class NodeTypeSettingsForm extends FormBase {
     ];
     $form['serie_directory'] = [
       '#type' => 'textfield',
-      '#title' => t('Templates directory'),
-      '#description' => t('Directory for the templates. It must have exactly six letters (example: wpaper).'),
+      '#title' => t('Templates directory for this serie'),
+      '#description' => t('It must have exactly six letters (example: wpaper).'),
       '#maxlength' => 6,
       '#size' => 6,
       '#default_value' => $repec->getEntityBundleSettings('serie_directory', 'node', $node_type),
@@ -156,6 +156,8 @@ class NodeTypeSettingsForm extends FormBase {
       }
     }
     $repec->setEntityBundleSettings($settings, 'node', $node_type);
+    $repec->createSeriesTemplate();
+
     $messenger = \Drupal::messenger();
     $messenger->addMessage(t('Your changes have been saved.'));
   }

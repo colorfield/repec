@@ -54,6 +54,69 @@ class Repec implements RepecInterface {
   /**
    * {@inheritdoc}
    */
+  public function initializeTemplates() {
+    $basePath = $this->settings->get('base_path');
+    if (empty($basePath)) {
+      \Drupal::messenger()->addError(t('The base path cannot be empty.'));
+      return;
+    }
+
+    $archiveDirectory = $this->getArchiveDirectory();
+    if (!empty($archiveDirectory) &&
+      file_prepare_directory($archiveDirectory, FILE_CREATE_DIRECTORY)) {
+      // Remove all files of type .rdf.
+      $files = glob($this->getArchiveDirectory() . '/*.rdf');
+      foreach ($files as $file) {
+        if (is_file($file)) {
+          unlink($file);
+        }
+      }
+
+      $this->createArchiveTemplate();
+      $this->createSeriesTemplate();
+
+      // @todo for each content type, create entity templates.
+
+    }
+    else {
+      \Drupal::messenger()->addError(t('Directory could not be created in the @path path', [
+        '@path' => $basePath,
+      ]));
+    }
+
+  }
+
+  /**
+   * Returns the archive directory.
+   *
+   * @return string
+   *   Directory from the public:// file system.
+   */
+  private function getArchiveDirectory() {
+    // @todo check config
+    $basePath = $this->settings->get('base_path');
+    $archiveCode = $this->settings->get('archive_code');
+    $result = 'public://' . $basePath . '/' . $archiveCode . '/';
+    return $result;
+  }
+
+  /**
+   * Creates the archive template.
+   */
+  private function createArchiveTemplate() {
+    // @todo implement
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function createSeriesTemplate() {
+    // @todo implement
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function createEntityTemplate(ContentEntityInterface $entity, $templateType) {
     // TODO: implement.
   }

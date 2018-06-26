@@ -6,13 +6,32 @@ use Drupal\Core\Entity\ContentEntityInterface;
 
 /**
  * Interface RepecInterface.
+ *
+ * @todo refactor in several interfaces/services for a better
+ * separation of concern.
  */
 interface RepecInterface {
 
   const SERIES_WORKING_PAPER = 'wpaper';
 
   /**
+   * Initializes the RePEc directory/file structure based on the configuration.
+   *
+   * Creates the archive code directory, creates the archive and series
+   * templates, iterates through each bundle to create the entity templates.
+   */
+  public function initializeTemplates();
+
+  /**
+   * Creates (or re-creates) the series template.
+   */
+  public function createSeriesTemplate();
+
+  /**
    * Creates a RePEc template.
+   *
+   * The scope of this template is per entity, so meant tho be stored in
+   * a sub-directory e.g. aaa/wpaper.
    *
    * @param \Drupal\Core\Entity\ContentEntityInterface $entity
    *   The entity that is the subject of the template.
@@ -24,6 +43,9 @@ interface RepecInterface {
   /**
    * Updates a RePEc template.
    *
+   * The scope of this template is per entity, so meant tho be stored in
+   * a sub-directory e.g. aaa/wpaper.
+   *
    * @param \Drupal\Core\Entity\ContentEntityInterface $entity
    *   The entity that is the subject of the template.
    * @param int $templateType
@@ -33,6 +55,9 @@ interface RepecInterface {
 
   /**
    * Removes a RePEc template.
+   *
+   * The scope of this template is per entity, so meant tho be stored in
+   * a sub-directory e.g. aaa/wpaper.
    *
    * @param \Drupal\Core\Entity\ContentEntityInterface $entity
    *   The entity that is the subject of the template.

@@ -120,6 +120,11 @@ class SettingsForm extends ConfigFormBase {
       ->set('maintainer_name', $form_state->getValue('maintainer_name'))
       ->set('maintainer_email', $form_state->getValue('maintainer_email'))
       ->save();
+
+    // @todo if directory exists, add confirmation, this removes / recreates all rdf files.
+    /** @var \Drupal\repec\RepecInterface $repec */
+    $repec = \Drupal::service('repec');
+    $repec->initializeTemplates();
   }
 
 }

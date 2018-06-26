@@ -48,6 +48,7 @@ function repec_entity_update(EntityInterface $entity) {
   assert($entity instanceof ContentEntityInterface);
   /** @var \Drupal\repec\RepecInterface $repec */
   $repec = \Drupal::service('repec');
+  // @todo review if delete should be runned when entity is unpublished
   if ($repec->isBundleEnabled($entity)) {
     $repec->updateEntityTemplate($entity, Repec::SERIES_WORKING_PAPER);
   }
