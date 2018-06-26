@@ -43,7 +43,7 @@ class SettingsForm extends ConfigFormBase {
     $form['base_path'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Base path'),
-      '#description' => $this->t('Path for the main directory to store the template files. This is the directory to be checked by RePEc system. It must be on the public filesystem.'),
+      '#description' => $this->t('Path for the main directory to store the template files. This is the directory to be checked by RePEc system. It must be on the public file system (public://, by default /sites/default/files).'),
       '#maxlength' => 254,
       '#size' => 64,
       '#default_value' => $config->get('base_path'),

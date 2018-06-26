@@ -21,17 +21,18 @@ class NodeTypeSettingsForm extends FormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state, $node_type = NULL) {
+    /** @var \Drupal\repec\RepecInterface $repec */
+    $repec = \Drupal::service('repec');
     $storage = [
       'node_type' => $node_type,
     ];
     $form_state->setStorage($storage);
 
     // @todo check system wide settings first
-
     $form['enabled'] = [
       '#type' => 'checkbox',
       '#title' => t('Enable RePEc for this content type'),
-      '#default_value' => repec_get_entity_bundle_settings('enabled', 'node', $node_type),
+      '#default_value' => $repec->getEntityBundleSettings('enabled', 'node', $node_type),
     ];
 
     $bundleFields = \Drupal::entityManager()->getFieldDefinitions('node', $node_type);
@@ -57,7 +58,7 @@ class NodeTypeSettingsForm extends FormBase {
         '#type' => 'select',
         '#title' => $fieldLabel,
         '#options' => $options,
-        '#default_value' => repec_get_entity_bundle_settings($fieldKey, 'node', $node_type),
+        '#default_value' => $repec->getEntityBundleSettings($fieldKey, 'node', $node_type),
         '#states' => [
           'visible' => [
             ':input[name="enabled"]' => ['checked' => TRUE],
@@ -88,19 +89,21 @@ class NodeTypeSettingsForm extends FormBase {
     $node_type = $storage['node_type'];
     // Update RePEc settings.
     $settings = [];
+    /** @var \Drupal\repec\RepecInterface $repec */
+    $repec = \Drupal::service('repec');
     // Empty configuration if set again to disabled.
     if (!$values['enabled']) {
-      $settings = repec_get_entity_bundle_setting_defaults();
+      $settings = $repec->getEntityBundleSettingDefaults();
     }
     else {
-      $settings = repec_get_entity_bundle_settings('all', 'node', $node_type);
-      foreach (repec_available_entity_bundle_settings() as $setting) {
+      $settings = $repec->getEntityBundleSettings('all', 'node', $node_type);
+      foreach ($repec->availableEntityBundleSettings() as $setting) {
         if (isset($values[$setting])) {
           $settings[$setting] = is_array($values[$setting]) ? array_keys(array_filter($values[$setting])) : $values[$setting];
         }
       }
     }
-    repec_set_entity_bundle_settings($settings, 'node', $node_type);
+    $repec->setEntityBundleSettings($settings, 'node', $node_type);
     $messenger = \Drupal::messenger();
     $messenger->addMessage(t('Your changes have been saved.'));
   }
