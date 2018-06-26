@@ -58,22 +58,22 @@ function hook_repec_series_mapping_alter(array &$data) {
 }
 
 /**
- * Maps the archive fields with the fields from the entity bundle settings page.
+ * Defines hook_repec_series_mapping_alter().
  *
  * @ingroup repec
  */
-function repec_repec_archive_mapping() {
+function hook_repec_archive_mapping() {
 }
 
 /**
- * Hook_repec_archive_mapping_alter() definition.
+ * Defines hook_repec_archive_mapping_alter().
  *
  * @param array $data
  *   Todo description.
  *
  * @ingroup repec
  */
-function repec_repec_archive_mapping_alter(array &$data) {
+function hook_repec_archive_mapping_alter(array &$data) {
 }
 
 /**
