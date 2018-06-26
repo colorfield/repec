@@ -87,6 +87,42 @@ class Repec implements RepecInterface {
   }
 
   /**
+   * {@inheritdoc}
+   */
+  public function getArchiveTemplate() {
+    // @todo use hook_repec_archive_mapping
+    // @todo implement getArchiveTemplate() method.
+    $result = [];
+    return $result;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getSeriesTemplate() {
+    // @todo use hook_repec_series_mapping
+    // @todo implement getSeriesTemplate() method.
+    $result = [];
+    return $result;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getEntityTemplate(ContentEntityInterface $entity) {
+    // @todo implement getEntityTemplate() method.
+    $result = [];
+    return $result;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function createTemplate(array $template, $templateType) {
+    // @todo implement createTemplate() method.
+  }
+
+  /**
    * Returns the archive directory.
    *
    * @return string
@@ -104,35 +140,38 @@ class Repec implements RepecInterface {
    * Creates the archive template.
    */
   private function createArchiveTemplate() {
-    // @todo implement
+    $template = $this->getArchiveTemplate();
+    $this->createTemplate($template, RepecInterface::TEMPLATE_ARCHIVE);
   }
 
   /**
    * {@inheritdoc}
    */
   public function createSeriesTemplate() {
-    // @todo implement
+    $template = $this->getArchiveTemplate();
+    $this->createTemplate($template, RepecInterface::TEMPLATE_SERIES);
   }
 
   /**
    * {@inheritdoc}
    */
   public function createEntityTemplate(ContentEntityInterface $entity, $templateType) {
-    // TODO: implement.
+    // @todo use hooks (currently limited to hook_repec_paper_mapping)
+    // @todo implement
   }
 
   /**
    * {@inheritdoc}
    */
   public function updateEntityTemplate(ContentEntityInterface $entity, $templateType) {
-    // TODO: implement.
+    // @todo implement
   }
 
   /**
    * {@inheritdoc}
    */
   public function deleteEntityTemplate(ContentEntityInterface $entity, $templateType) {
-    // TODO: implement.
+    // @todo implement
   }
 
   /**

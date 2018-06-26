@@ -12,6 +12,9 @@ use Drupal\Core\Entity\ContentEntityInterface;
  */
 interface RepecInterface {
 
+  const TEMPLATE_ARCHIVE = 'arch';
+  const TEMPLATE_SERIES = 'seri';
+
   const SERIES_WORKING_PAPER = 'wpaper';
 
   /**
@@ -23,9 +26,52 @@ interface RepecInterface {
   public function initializeTemplates();
 
   /**
-   * Creates (or re-creates) the series template.
+   * Maps the archive template to the system wide configuration.
+   *
+   * @return array
+   *   RDF template.
    */
-  public function createSeriesTemplate();
+  public function getArchiveTemplate();
+
+  /**
+   * Maps the series template to the bundle(s) configuration.
+   *
+   * @return array
+   *   RDF template.
+   */
+  public function getSeriesTemplate();
+
+  /**
+   * Maps a template to an entity based on its bundle configuration.
+   *
+   * @param \Drupal\Core\Entity\ContentEntityInterface $entity
+   *   The entity that is the subject of the template.
+   *
+   * @return array
+   *   RDF template.
+   */
+  public function getEntityTemplate(ContentEntityInterface $entity);
+
+  /**
+   * Returns the RePEc template fields for a template type.
+   *
+   * @param string $templateType
+   *   The template type.
+   *
+   * @return array
+   *   Key value indexed template for RePEc fields.
+   */
+  public function getTemplateFields($templateType);
+
+  /**
+   * Creates a template or re-creates it if it exists.
+   *
+   * @param array $template
+   *   RDF template.
+   * @param string $templateType
+   *   Template type.
+   */
+  public function createTemplate(array $template, $templateType);
 
   /**
    * Creates a RePEc template.
@@ -76,17 +122,6 @@ interface RepecInterface {
    *   List of RePEc series template.
    */
   public function availableSeries();
-
-  /**
-   * Returns the RePEc template fields for a template type.
-   *
-   * @param string $templateType
-   *   The template type.
-   *
-   * @return array
-   *   Key value indexed template for RePEc fields.
-   */
-  public function getTemplateFields($templateType);
 
   /**
    * Checks if an entity type and bundle is RePEc enabled.
