@@ -9,7 +9,7 @@ use Drupal\Core\Entity\ContentEntityInterface;
  */
 interface RepecInterface {
 
-  const TEMPLATE_WORKING_PAPER = 0;
+  const SERIES_WORKING_PAPER = 'wpaper';
 
   /**
    * Creates a RePEc template.
@@ -19,7 +19,7 @@ interface RepecInterface {
    * @param int $templateType
    *   The template type.
    */
-  public function createTemplate(ContentEntityInterface $entity, $templateType);
+  public function createEntityTemplate(ContentEntityInterface $entity, $templateType);
 
   /**
    * Updates a RePEc template.
@@ -29,7 +29,7 @@ interface RepecInterface {
    * @param int $templateType
    *   The template type.
    */
-  public function updateTemplate(ContentEntityInterface $entity, $templateType);
+  public function updateEntityTemplate(ContentEntityInterface $entity, $templateType);
 
   /**
    * Removes a RePEc template.
@@ -39,7 +39,29 @@ interface RepecInterface {
    * @param int $templateType
    *   The template type.
    */
-  public function deleteTemplate(ContentEntityInterface $entity, $templateType);
+  public function deleteEntityTemplate(ContentEntityInterface $entity, $templateType);
+
+  /**
+   * Get RePEc series.
+   *
+   * @see https://ideas.repec.org/t/seritemplate.html
+   * @see https://ideas.repec.org/t/rdfintro.html
+   *
+   * @return array
+   *   List of RePEc series template.
+   */
+  public function availableSeries();
+
+  /**
+   * Returns the RePEc template fields for a template type.
+   *
+   * @param string $templateType
+   *   The template type.
+   *
+   * @return array
+   *   Key value indexed template for RePEc fields.
+   */
+  public function getTemplateFields($templateType);
 
   /**
    * Checks if an entity type and bundle is RePEc enabled.

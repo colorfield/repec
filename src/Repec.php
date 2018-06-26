@@ -5,7 +5,6 @@ namespace Drupal\repec;
 use Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\File\FileSystem;
 use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
 
@@ -55,21 +54,53 @@ class Repec implements RepecInterface {
   /**
    * {@inheritdoc}
    */
-  public function createTemplate(ContentEntityInterface $entity, $templateType) {
-    // TODO: Implement createTemplate() method.
+  public function createEntityTemplate(ContentEntityInterface $entity, $templateType) {
+    // TODO: implement.
   }
 
   /**
    * {@inheritdoc}
    */
-  public function updateTemplate(ContentEntityInterface $entity, $templateType) {
-    // TODO: Implement updateTemplate() method.
+  public function updateEntityTemplate(ContentEntityInterface $entity, $templateType) {
+    // TODO: implement.
   }
 
   /**
    * {@inheritdoc}
    */
-  public function deleteTemplate(ContentEntityInterface $entity, $templateType) {
+  public function deleteEntityTemplate(ContentEntityInterface $entity, $templateType) {
+    // TODO: implement.
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function availableSeries() {
+    return [
+      // The series is subject to be extended
+      // but currently limited to wpaper.
+      RepecInterface::SERIES_WORKING_PAPER => t('Paper series'),
+    ];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getTemplateFields($templateType) {
+    // @todo extend to other templates via a factory
+    $result = [];
+    switch ($templateType) {
+      case RepecInterface::SERIES_WORKING_PAPER:
+        $result = [
+          'author_name' => t('Author-Name'),
+          'abstract' => t('Abstract'),
+          'creation_date' => t('Creation-Date'),
+          'file_url' => t('File-URL'),
+          'keywords' => t('Keywords'),
+        ];
+        break;
+    }
+    return $result;
   }
 
   /**
@@ -143,6 +174,9 @@ class Repec implements RepecInterface {
   public function availableEntityBundleSettings() {
     return [
       'enabled',
+      'serie_type',
+      'serie_name',
+      'serie_directory',
       'author_name',
       'abstract',
       'creation_date',
@@ -157,6 +191,9 @@ class Repec implements RepecInterface {
   public function getEntityBundleSettingDefaults() {
     $defaults = [];
     $defaults['enabled'] = FALSE;
+    $defaults['serie_type'] = '';
+    $defaults['serie_name'] = '';
+    $defaults['serie_directory'] = '';
     $defaults['author_name'] = '';
     $defaults['abstract'] = '';
     $defaults['creation_date'] = '';

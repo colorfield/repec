@@ -4,6 +4,7 @@ namespace Drupal\repec\Form;
 
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\repec\RepecInterface;
 
 /**
  * Node type settings form.
@@ -35,29 +36,67 @@ class NodeTypeSettingsForm extends FormBase {
       '#default_value' => $repec->getEntityBundleSettings('enabled', 'node', $node_type),
     ];
 
+    $form['serie_type'] = [
+      '#type' => 'select',
+      '#title' => t('Series'),
+      '#options' => $repec->availableSeries(),
+      '#default_value' => $repec->getEntityBundleSettings('serie_type', 'node', $node_type),
+      '#states' => [
+        'visible' => [
+          ':input[name="enabled"]' => ['checked' => TRUE],
+        ],
+        'required' => [
+          ':input[name="enabled"]' => ['checked' => TRUE],
+        ],
+      ],
+    ];
+    $form['serie_name'] = [
+      '#type' => 'textfield',
+      '#title' => t('Serie name'),
+      '#description' => t('Name for the serie (example: Working Paper).'),
+      '#default_value' => $repec->getEntityBundleSettings('serie_name', 'node', $node_type),
+      '#states' => [
+        'visible' => [
+          ':input[name="enabled"]' => ['checked' => TRUE],
+        ],
+        'required' => [
+          ':input[name="enabled"]' => ['checked' => TRUE],
+        ],
+      ],
+    ];
+    $form['serie_directory'] = [
+      '#type' => 'textfield',
+      '#title' => t('Templates directory'),
+      '#description' => t('Directory for the templates. It must have exactly six letters (example: wpaper).'),
+      '#maxlength' => 6,
+      '#default_value' => $repec->getEntityBundleSettings('serie_directory', 'node', $node_type),
+      '#states' => [
+        'visible' => [
+          ':input[name="enabled"]' => ['checked' => TRUE],
+        ],
+        'required' => [
+          ':input[name="enabled"]' => ['checked' => TRUE],
+        ],
+      ],
+    ];
+
     $bundleFields = \Drupal::entityManager()->getFieldDefinitions('node', $node_type);
-    $options = [];
+    $fieldOptions = [];
     foreach ($bundleFields as $fieldName => $fieldDefinition) {
       if (!empty($fieldDefinition->getTargetBundle())) {
-        $options[$fieldName] = $fieldDefinition->getLabel();
+        $fieldOptions[$fieldName] = $fieldDefinition->getLabel();
         // @todo validate
         // $fieldDefinition->getType();
       }
     }
 
-    $repecFields = [
-      'author_name' => t('Author-Name'),
-      'abstract' => t('Abstract'),
-      'creation_date' => t('Creation-Date'),
-      'file_url' => t('File-URL'),
-      'keywords' => t('Keywords'),
-    ];
+    $repecTemplateFields = $repec->getTemplateFields(RepecInterface::SERIES_WORKING_PAPER);
 
-    foreach ($repecFields as $fieldKey => $fieldLabel) {
+    foreach ($repecTemplateFields as $fieldKey => $fieldLabel) {
       $form[$fieldKey] = [
         '#type' => 'select',
         '#title' => $fieldLabel,
-        '#options' => $options,
+        '#options' => $fieldOptions,
         '#default_value' => $repec->getEntityBundleSettings($fieldKey, 'node', $node_type),
         '#states' => [
           'visible' => [
