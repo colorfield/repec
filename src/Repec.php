@@ -177,29 +177,43 @@ class Repec implements RepecInterface {
   /**
    * {@inheritdoc}
    */
+  public function getPaperTemplate(ContentEntityInterface $entity) {
+    return [
+      [
+        'attribute' => 'Template-Type',
+        'value' => 'ReDIF-Paper 1.0',
+      ],
+    ];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getEntityTemplate(ContentEntityInterface $entity) {
-    // @todo implement getEntityTemplate() method.
     // @todo review usage of RDF module.
-    $result = [];
-    return $result;
+    // @todo implement and refactor with getPaperTemplate().
   }
 
   /**
    * {@inheritdoc}
    */
   public function createTemplate(array $template, $templateType) {
-    // @todo directory based on template type
-    $directory = $this->getArchiveDirectory();
-    $fileName = $templateType . '.rdf';
-    $content = '';
-    foreach ($template as $item) {
-      $content .= $item['attribute'] . ': ' . $item['value'] . "\n";
-    }
+    try {
+      $directory = $this->getTemplateDirectory($templateType);
+      $fileName = $templateType . '.rdf';
+      $content = '';
+      foreach ($template as $item) {
+        $content .= $item['attribute'] . ': ' . $item['value'] . "\n";
+      }
 
-    if (!file_put_contents($directory . '/' . $fileName, $content)) {
-      \Drupal::messenger()->addError(t('File @file_name could not be created', [
-        '@file_name' => $fileName,
-      ]));
+      if (!file_put_contents($directory . '/' . $fileName, $content)) {
+        \Drupal::messenger()->addError(t('File @file_name could not be created', [
+          '@file_name' => $fileName,
+        ]));
+      }
+    }
+    catch (\Exception $exception) {
+      \Drupal::messenger()->addError($exception->getMessage());
     }
   }
 
@@ -214,6 +228,36 @@ class Repec implements RepecInterface {
     $basePath = $this->settings->get('base_path');
     $archiveCode = $this->settings->get('archive_code');
     $result = 'public://' . $basePath . '/' . $archiveCode . '/';
+    return $result;
+  }
+
+  /**
+   * Returns the archive directory.
+   *
+   * @param string $templateType
+   *   The template type.
+   *
+   * @return string
+   *   Directory from the public:// file system.
+   *
+   * @throws \Exception
+   */
+  private function getTemplateDirectory($templateType) {
+    $result = '';
+    switch ($templateType) {
+      case RepecInterface::TEMPLATE_SERIES:
+      case RepecInterface::TEMPLATE_ARCHIVE:
+        $result = $this->getArchiveDirectory();
+        break;
+
+      case RepecInterface::SERIES_WORKING_PAPER:
+        // @todo get it from the bundle config
+        $result = $this->getArchiveDirectory() . RepecInterface::SERIES_WORKING_PAPER . '/';
+        break;
+    }
+    if (empty($result)) {
+      throw new \Exception(t('The template directory cannot be empty.'));
+    }
     return $result;
   }
 
@@ -234,18 +278,33 @@ class Repec implements RepecInterface {
   }
 
   /**
+   * Maps the series fields with the node fields to create the template file.
+   *
+   * @param \Drupal\Core\Entity\ContentEntityInterface $entity
+   *   The entity that is the subject of the mapping.
+   */
+  private function createPaperTemplate(ContentEntityInterface $entity) {
+    $template = $this->getPaperTemplate($entity);
+    $this->createTemplate($template, RepecInterface::SERIES_WORKING_PAPER);
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function createEntityTemplate(ContentEntityInterface $entity, $templateType) {
-    // @todo use hooks (currently limited to hook_repec_paper_mapping)
-    // @todo implement
+    // @todo based on the bundle configuration, select series
+    // via a factory to get the right template.
+    // Currently limiting it to wpaper series.
+    $this->createPaperTemplate($entity);
   }
 
   /**
    * {@inheritdoc}
    */
   public function updateEntityTemplate(ContentEntityInterface $entity, $templateType) {
-    // @todo implement
+    // @todo delete should be runned when entity is unpublished
+    // Otherwise, barely re-create the entity template.
+    $this->createEntityTemplate($entity, $templateType);
   }
 
   /**
