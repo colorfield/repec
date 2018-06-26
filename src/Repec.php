@@ -65,6 +65,7 @@ class Repec implements RepecInterface {
     if (!empty($archiveDirectory) &&
       file_prepare_directory($archiveDirectory, FILE_CREATE_DIRECTORY)) {
       // Remove all files of type .rdf.
+      // @todo use Drupal file system unlink
       $files = glob($this->getArchiveDirectory() . '/*.rdf');
       foreach ($files as $file) {
         if (is_file($file)) {
@@ -79,7 +80,7 @@ class Repec implements RepecInterface {
 
     }
     else {
-      \Drupal::messenger()->addError(t('Directory could not be created in the @path path', [
+      \Drupal::messenger()->addError(t('Directory @path could not be created.', [
         '@path' => $basePath,
       ]));
     }
@@ -178,12 +179,55 @@ class Repec implements RepecInterface {
    * {@inheritdoc}
    */
   public function getPaperTemplate(ContentEntityInterface $entity) {
-    return [
+    $result = [
       [
         'attribute' => 'Template-Type',
         'value' => 'ReDIF-Paper 1.0',
       ],
+      [
+        'attribute' => 'Title',
+        'value' => $entity->label(),
+      ],
+      [
+        'attribute' => 'Number',
+        // Entity id cannot be used here as there could be
+        // probably several entity types in a further release.
+        'value' => $entity->uuid(),
+      ],
+      [
+        'attribute' => 'Handle',
+        // @todo review usage of node id.
+        'value' => 'RePEc:' . $this->settings->get('archive_code') . ':wpaper:' . $entity->id(),
+      ],
     ];
+    $templateFields = $this->getTemplateFields(RepecInterface::SERIES_WORKING_PAPER);
+    foreach ($templateFields as $key => $value) {
+      // @todo append File-Format attribute for files
+      $result[] = [
+        [
+          'attribute' => $value,
+          'value' => $this->getFieldValue($entity, $key),
+        ],
+      ];
+    }
+    return $result;
+  }
+
+  /**
+   * Maps the value of a field based on the attributed.
+   *
+   * The attribute / field mapping is done via the entity type configuration.
+   *
+   * @param \Drupal\Core\Entity\ContentEntityInterface $entity
+   *   The entity to get the field value from.
+   * @param string $attribute
+   *   The attributed that is mapped to the field for the entity bundle.
+   *
+   * @return string
+   *   The field value to be used in the RDF template.
+   */
+  private function getFieldValue(ContentEntityInterface $entity, $attribute) {
+    return '@todo';
   }
 
   /**
@@ -192,73 +236,6 @@ class Repec implements RepecInterface {
   public function getEntityTemplate(ContentEntityInterface $entity) {
     // @todo review usage of RDF module.
     // @todo implement and refactor with getPaperTemplate().
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function createTemplate(array $template, $templateType) {
-    try {
-      $directory = $this->getTemplateDirectory($templateType);
-      $fileName = $templateType . '.rdf';
-      $content = '';
-      foreach ($template as $item) {
-        $content .= $item['attribute'] . ': ' . $item['value'] . "\n";
-      }
-
-      if (!file_put_contents($directory . '/' . $fileName, $content)) {
-        \Drupal::messenger()->addError(t('File @file_name could not be created', [
-          '@file_name' => $fileName,
-        ]));
-      }
-    }
-    catch (\Exception $exception) {
-      \Drupal::messenger()->addError($exception->getMessage());
-    }
-  }
-
-  /**
-   * Returns the archive directory.
-   *
-   * @return string
-   *   Directory from the public:// file system.
-   */
-  private function getArchiveDirectory() {
-    // @todo check config
-    $basePath = $this->settings->get('base_path');
-    $archiveCode = $this->settings->get('archive_code');
-    $result = 'public://' . $basePath . '/' . $archiveCode . '/';
-    return $result;
-  }
-
-  /**
-   * Returns the archive directory.
-   *
-   * @param string $templateType
-   *   The template type.
-   *
-   * @return string
-   *   Directory from the public:// file system.
-   *
-   * @throws \Exception
-   */
-  private function getTemplateDirectory($templateType) {
-    $result = '';
-    switch ($templateType) {
-      case RepecInterface::TEMPLATE_SERIES:
-      case RepecInterface::TEMPLATE_ARCHIVE:
-        $result = $this->getArchiveDirectory();
-        break;
-
-      case RepecInterface::SERIES_WORKING_PAPER:
-        // @todo get it from the bundle config
-        $result = $this->getArchiveDirectory() . RepecInterface::SERIES_WORKING_PAPER . '/';
-        break;
-    }
-    if (empty($result)) {
-      throw new \Exception(t('The template directory cannot be empty.'));
-    }
-    return $result;
   }
 
   /**
@@ -278,6 +255,38 @@ class Repec implements RepecInterface {
   }
 
   /**
+   * {@inheritdoc}
+   */
+  public function createTemplate(array $template, $templateType) {
+    $directory = $this->getArchiveDirectory();
+    $fileName = $this->settings->get('archive_code') . $templateType . '.rdf';
+    $content = '';
+    foreach ($template as $item) {
+      $content .= $item['attribute'] . ': ' . $item['value'] . "\n";
+    }
+
+    if (!file_put_contents($directory . '/' . $fileName, $content)) {
+      \Drupal::messenger()->addError(t('File @file_name could not be created', [
+        '@file_name' => $fileName,
+      ]));
+    }
+  }
+
+  /**
+   * Returns the archive directory.
+   *
+   * @return string
+   *   Directory from the public:// file system.
+   */
+  private function getArchiveDirectory() {
+    // @todo check config
+    $basePath = $this->settings->get('base_path');
+    $archiveCode = $this->settings->get('archive_code');
+    $result = 'public://' . $basePath . '/' . $archiveCode . '/';
+    return $result;
+  }
+
+  /**
    * Maps the series fields with the node fields to create the template file.
    *
    * @param \Drupal\Core\Entity\ContentEntityInterface $entity
@@ -285,7 +294,31 @@ class Repec implements RepecInterface {
    */
   private function createPaperTemplate(ContentEntityInterface $entity) {
     $template = $this->getPaperTemplate($entity);
-    $this->createTemplate($template, RepecInterface::SERIES_WORKING_PAPER);
+    $serieDirectoryConfig = $this->getEntityBundleSettings('serie_directory', $entity->getEntityTypeId(), $entity->bundle());
+    $directory = $this->getArchiveDirectory() . $serieDirectoryConfig . '/';
+
+    if (!empty($directory) &&
+      file_prepare_directory($directory, FILE_CREATE_DIRECTORY)) {
+
+      $fileName = $serieDirectoryConfig . '_' . $entity->getEntityTypeId() . '_' . $entity->id() . '.rdf';
+
+      $content = '';
+      foreach ($template as $item) {
+        $content .= $item['attribute'] . ': ' . $item['value'] . "\n";
+      }
+
+      if (!file_put_contents($directory . '/' . $fileName, $content)) {
+        \Drupal::messenger()->addError(t('File @file_name could not be created', [
+          '@file_name' => $fileName,
+        ]));
+      }
+
+    }
+    else {
+      \Drupal::messenger()->addError(t('Directory @path could not be created.', [
+        '@path' => $directory,
+      ]));
+    }
   }
 
   /**
