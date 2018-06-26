@@ -61,7 +61,7 @@ class SettingsForm extends ConfigFormBase {
     $form['provider_homepage'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Provider homepage'),
-      '#description' => $this->t('Homepage of the provider institution (example: http://lusk.usc.edu).'),
+      '#description' => $this->t('Homepage of the provider institution, without a trailing slash (example: http://lusk.usc.edu).'),
       '#maxlength' => 250,
       '#size' => 64,
       '#default_value' => $config->get('provider_homepage'),
@@ -99,6 +99,7 @@ class SettingsForm extends ConfigFormBase {
   public function validateForm(array &$form, FormStateInterface $form_state) {
     parent::validateForm($form, $form_state);
     // @todo validate provider homepage
+    // @todo remove trailing slash from provider homepage if any
     $archiveCode = $form_state->getValue('archive_code');
     if (strlen($archiveCode) !== 3) {
       $form_state->setErrorByName('archive_code', t('Archive code must have exactly 3 letters.'));

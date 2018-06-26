@@ -126,6 +126,10 @@ class NodeTypeSettingsForm extends FormBase {
   public function validateForm(array &$form, FormStateInterface $form_state) {
     parent::validateForm($form, $form_state);
     // @todo validate selected field types
+
+    // @todo validate multiple bundle configuration for the same serie:
+    // an existing serie must have the same value as another
+    // potentially used bundle.
     $directory = $form_state->getValue('serie_directory');
     if (strlen($directory) !== 6) {
       $form_state->setErrorByName('serie_directory', t('Serie directory must have exactly 6 letters.'));

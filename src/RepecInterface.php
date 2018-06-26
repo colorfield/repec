@@ -74,6 +74,11 @@ interface RepecInterface {
   public function createTemplate(array $template, $templateType);
 
   /**
+   * Creates a series template.
+   */
+  public function createSeriesTemplate();
+
+  /**
    * Creates a RePEc template.
    *
    * The scope of this template is per entity, so meant tho be stored in

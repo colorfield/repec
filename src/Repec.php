@@ -91,9 +91,40 @@ class Repec implements RepecInterface {
    */
   public function getArchiveTemplate() {
     // @todo use hook_repec_archive_mapping
-    // @todo implement getArchiveTemplate() method.
-    $result = [];
-    return $result;
+    $url = $this->settings->get('provider_homepage');
+    $url .= '/' . $this->settings->get('base_path');
+    $url .= '/' . $this->settings->get('archive_code');
+    return [
+      [
+        'attribute' => 'Template-type',
+        'value' => 'ReDIF-Archive 1.0',
+      ],
+      [
+        'attribute' => 'Handle',
+        'value' => 'RePEc:' . $this->settings->get('archive_code'),
+      ],
+      [
+        'attribute' => 'Name',
+        'value' => $this->settings->get('provider_name'),
+      ],
+      [
+        'attribute' => 'Maintainer-Name',
+        'value' => $this->settings->get('maintainer_name'),
+      ],
+      [
+        'attribute' => 'Maintainer-Email',
+        'value' => $this->settings->get('maintainer_email'),
+      ],
+      [
+        'attribute' => 'Description',
+        // @todo review 'publications'
+        'value' => 'This archive collects publications from ' . $this->settings->get('provider_name'),
+      ],
+      [
+        'attribute' => 'URL',
+        'value' => $url,
+      ],
+    ];
   }
 
   /**
@@ -101,9 +132,46 @@ class Repec implements RepecInterface {
    */
   public function getSeriesTemplate() {
     // @todo use hook_repec_series_mapping
-    // @todo implement getSeriesTemplate() method.
-    $result = [];
-    return $result;
+    return [
+      [
+        'attribute' => 'Template-type',
+        'value' => 'ReDIF-Series 1.0',
+      ],
+      [
+        'attribute' => 'Name',
+        // @todo get from bundle series configuration.
+        'value' => 'Working Paper',
+      ],
+      [
+        'attribute' => 'Provider-Name',
+        'value' => $this->settings->get('provider_name'),
+      ],
+      [
+        'attribute' => 'Provider-Homepage',
+        'value' => $this->settings->get('provider_homepage'),
+      ],
+      [
+        'attribute' => 'Provider-Institution',
+        'value' => $this->settings->get('provider_institution'),
+      ],
+      [
+        'attribute' => 'Maintainer-Name',
+        'value' => $this->settings->get('maintainer_name'),
+      ],
+      [
+        'attribute' => 'Maintainer-Email',
+        'value' => $this->settings->get('maintainer_email'),
+      ],
+      [
+        'attribute' => 'Type',
+        // @todo get from bundle series configuration.
+        'value' => 'ReDIF-Paper',
+      ],
+      [
+        'attribute' => 'Handle',
+        'value' => 'RePEc:' . $this->settings->get('archive_code') . ':wpaper',
+      ],
+    ];
   }
 
   /**
@@ -111,6 +179,7 @@ class Repec implements RepecInterface {
    */
   public function getEntityTemplate(ContentEntityInterface $entity) {
     // @todo implement getEntityTemplate() method.
+    // @todo review usage of RDF module.
     $result = [];
     return $result;
   }
@@ -119,7 +188,19 @@ class Repec implements RepecInterface {
    * {@inheritdoc}
    */
   public function createTemplate(array $template, $templateType) {
-    // @todo implement createTemplate() method.
+    // @todo directory based on template type
+    $directory = $this->getArchiveDirectory();
+    $fileName = $templateType . '.rdf';
+    $content = '';
+    foreach ($template as $item) {
+      $content .= $item['attribute'] . ': ' . $item['value'] . "\n";
+    }
+
+    if (!file_put_contents($directory . '/' . $fileName, $content)) {
+      \Drupal::messenger()->addError(t('File @file_name could not be created', [
+        '@file_name' => $fileName,
+      ]));
+    }
   }
 
   /**
@@ -148,7 +229,7 @@ class Repec implements RepecInterface {
    * {@inheritdoc}
    */
   public function createSeriesTemplate() {
-    $template = $this->getArchiveTemplate();
+    $template = $this->getSeriesTemplate();
     $this->createTemplate($template, RepecInterface::TEMPLATE_SERIES);
   }
 
@@ -179,7 +260,7 @@ class Repec implements RepecInterface {
    */
   public function availableSeries() {
     return [
-      // The series is subject to be extended
+      // The series list is subject to be extended
       // but currently limited to wpaper.
       RepecInterface::SERIES_WORKING_PAPER => t('Paper series'),
     ];
