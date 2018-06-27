@@ -260,12 +260,21 @@ class Repec implements RepecInterface {
         ];
         break;
 
+      // Abstract needs post-processing.
+      case 'abstract':
+        $value = strip_tags($this->getDefaultAttributeValue($fieldValue));
+        $result[] = [
+          'attribute' => $attribute_name,
+          'value' => $value,
+        ];
+        break;
+
       // Keywords can be multiple
       // and are loaded from the taxonomy.
       case 'keywords':
         $result[] = [
           'attribute' => $attribute_name,
-          'value' => $this->getDefaultAttributeValue($fieldValue),
+          'value' => $this->getKeywordsValue($fieldValue),
         ];
         break;
 
@@ -305,14 +314,50 @@ class Repec implements RepecInterface {
   /**
    * Get a single valued attribute.
    *
-   * @param array $fieldValue
+   * @param array $field_value
    *   Entity field value.
    *
    * @return string
    *   Attribute value.
    */
-  private function getDefaultAttributeValue(array $fieldValue) {
-    return empty($fieldValue[0]['value']) ? '' : $fieldValue[0]['value'];
+  private function getDefaultAttributeValue(array $field_value) {
+    return empty($field_value[0]['value']) ? '' : $field_value[0]['value'];
+  }
+
+  /**
+   * Get a list of keywords from taxonomy terms referenced by an entity.
+   *
+   * @param array $field_value
+   *   Entity field value.
+   *
+   * @return string
+   *   Comma separated list of keywords.
+   */
+  private function getKeywordsValue(array $field_value) {
+    $result = '';
+    try {
+      // Could be replaced by field->referencedEntities but needs refactoring
+      // to get field instead of fieldValue from getFieldValues().
+      if (!empty($field_value[0]['target_id'])) {
+        $tids = [];
+        foreach ($field_value as $value) {
+          $tids[] = $value['target_id'];
+        }
+        $terms = $this->entityTypeManager->getStorage('taxonomy_term')
+          ->loadMultiple($tids);
+        $termNames = [];
+        /** @var \Drupal\taxonomy\Entity\Term $term */
+        foreach ($terms as $term) {
+          // @todo get translation
+          $termNames[] = $term->getName();
+        }
+        $result = implode(', ', $termNames);
+      }
+    }
+    catch (InvalidPluginDefinitionException $exception) {
+      \Drupal::messenger()->addError($exception->getMessage());
+    }
+    return $result;
   }
 
   /**
