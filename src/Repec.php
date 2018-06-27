@@ -253,16 +253,23 @@ class Repec implements RepecInterface {
         break;
 
       // Authors can be multiple.
+      // @todo the Drupal 7 module handled the first author only
+      // the way the template is written needs to be adjusted
+      // to allow several authors: currently, the Author-Name is
+      // an indexed key from an array so it does not allow
+      // multiple values with the same index.
       case 'author_name':
+        // $result = $this->getAuthorAttributes($fieldValue);
         $result[] = [
           'attribute' => $attribute_name,
-          'value' => $this->getDefaultAttributeValue($fieldValue),
+          'value' => $this->getAuthorAttributes($fieldValue)[0][$attribute_name],
         ];
         break;
 
       // Abstract needs post-processing.
       case 'abstract':
         $value = strip_tags($this->getDefaultAttributeValue($fieldValue));
+        $value = str_replace(["\r", "\n"], '', $value);
         $result[] = [
           'attribute' => $attribute_name,
           'value' => $value,
@@ -361,18 +368,18 @@ class Repec implements RepecInterface {
   }
 
   /**
-   * Get a RePEc attribute/value pairs for an entity file field value.
+   * Get RePEc attribute/value pairs for an entity file field value.
    *
-   * @param array $fieldValue
+   * @param array $field_value
    *   Entity field value.
    *
    * @return array
    *   List of attributes/values for a RePEc file.
    */
-  private function getFileAttributes(array $fieldValue) {
+  private function getFileAttributes(array $field_value) {
     $result = [];
-    if (!empty($fieldValue[0]['target_id'])) {
-      $file = File::load($fieldValue[0]['target_id']);
+    if (!empty($field_value[0]['target_id'])) {
+      $file = File::load($field_value[0]['target_id']);
       $uri = $file->getFileUri();
       $url = str_replace(' ', '%20', file_create_url($uri));
       $result[] = [
@@ -388,6 +395,49 @@ class Repec implements RepecInterface {
   }
 
   /**
+   * Get a RePEc attribute/value pairs for an entity author field value.
+   *
+   * @param array $field_value
+   *   Entity field value.
+   *
+   * @return array
+   *   List of attributes/values for RePEc author(s) cluster.
+   */
+  private function getAuthorAttributes(array $field_value) {
+    $result = [];
+    // @todo this field can be from several types (user reference, text, ...)
+    // going for the user reference by default.
+    // This needs at least a field validation during field mapping on the
+    // entity type settings form.
+    try {
+      // Could be replaced by field->referencedEntities but needs refactoring
+      // to get field instead of fieldValue from getFieldValues().
+      if (!empty($field_value[0]['target_id'])) {
+        $uids = [];
+        foreach ($field_value as $value) {
+          $uids[] = $value['target_id'];
+        }
+        $users = $this->entityTypeManager->getStorage('user')
+          ->loadMultiple($uids);
+        /** @var \Drupal\user\Entity\User $user */
+        foreach ($users as $user) {
+          // @todo this needs to be set from the config as user names
+          // can be fetched from first name / last name instead of
+          // the username and can produce other attributes like
+          // Author-Name-First and Author-Name-Last
+          $result[] = [
+            'Author-Name' => $user->getUsername(),
+          ];
+        }
+      }
+    }
+    catch (InvalidPluginDefinitionException $exception) {
+      \Drupal::messenger()->addError($exception->getMessage());
+    }
+    return $result;
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function getTemplateFields($templateType) {
@@ -397,6 +447,9 @@ class Repec implements RepecInterface {
       // @todo this is a port of the Drupal 7 module review paper template
       // as there are many more fields:
       // https://ideas.repec.org/t/papertemplate.html
+      // @todo take into account mandatory fields as required in the entity type
+      // settings form: Template-Type:, Author-Name:, Title: and Handle
+      // add this as and extra field attribute, needs refactoring.
       case RepecInterface::SERIES_WORKING_PAPER:
         $result = [
           'author_name' => t('Author-Name'),
