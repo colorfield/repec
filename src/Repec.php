@@ -76,7 +76,10 @@ class Repec implements RepecInterface {
       $this->createArchiveTemplate();
       $this->createSeriesTemplate();
 
-      // @todo for each content type, create entity templates.
+      // @todo extend to other entity types
+      foreach ($this->getEnabledEntityTypeBundles('node_type') as $nodeType) {
+        // @todo for each content type, create entity templates.
+      }
 
     }
     else {
@@ -196,38 +199,114 @@ class Repec implements RepecInterface {
       ],
       [
         'attribute' => 'Handle',
-        // @todo review usage of node id.
+        // @todo review unicity of node id for a shared series within several entity types.
         'value' => 'RePEc:' . $this->settings->get('archive_code') . ':wpaper:' . $entity->id(),
       ],
     ];
     $templateFields = $this->getTemplateFields(RepecInterface::SERIES_WORKING_PAPER);
-    foreach ($templateFields as $key => $value) {
-      // @todo append File-Format attribute for files
-      $result[] = [
-        [
-          'attribute' => $value,
-          'value' => $this->getFieldValue($entity, $key),
-        ],
-      ];
+    foreach ($templateFields as $attributeKey => $attributeName) {
+      foreach ($this->getFieldValues($entity, $attributeKey, $attributeName->render()) as $fieldValue) {
+        $result[] = $fieldValue;
+      }
     }
     return $result;
   }
 
   /**
-   * Maps the value of a field based on the attributed.
+   * Returns the archive directory.
+   *
+   * @return string
+   *   Directory from the public:// file system.
+   */
+  private function getArchiveDirectory() {
+    // @todo check config
+    $basePath = $this->settings->get('base_path');
+    $archiveCode = $this->settings->get('archive_code');
+    $result = 'public://' . $basePath . '/' . $archiveCode . '/';
+    return $result;
+  }
+
+  /**
+   * Maps the value of a field based on the attribute.
    *
    * The attribute / field mapping is done via the entity type configuration.
    *
    * @param \Drupal\Core\Entity\ContentEntityInterface $entity
    *   The entity to get the field value from.
-   * @param string $attribute
-   *   The attributed that is mapped to the field for the entity bundle.
+   * @param string $attribute_key
+   *   The attribute key that is mapped to the field for the entity bundle.
+   * @param string $attribute_name
+   *   The RDF attribute name used in the template.
+   *
+   * @return array
+   *   The field values to be used in the RDF template.
+   */
+  private function getFieldValues(ContentEntityInterface $entity, $attribute_key, $attribute_name) {
+    // @todo append File-Format attribute for files, move this into getFieldValue
+    $result = [];
+    switch ($attribute_key) {
+      // Files need to append the ...
+      case 'file_url':
+        $result[] = [
+          'attribute' => $attribute_name,
+          'value' => $this->getAttributeFieldMapping($entity, $attribute_key),
+        ];
+        break;
+
+      // Authors can be multiple.
+      case 'author_name':
+        $result[] = [
+          'attribute' => $attribute_name,
+          'value' => $this->getAttributeFieldMapping($entity, $attribute_key),
+        ];
+        break;
+
+      // @todo creation date fallback to entity created
+      default:
+        // Default to single attribute mapping.
+        $result[] = [
+          'attribute' => $attribute_name,
+          'value' => $this->getAttributeFieldMapping($entity, $attribute_key),
+        ];
+        break;
+    }
+    return $result;
+  }
+
+  /**
+   * Get the mapping between a RePEc attribute and an entity field.
+   *
+   * @param \Drupal\Core\Entity\ContentEntityInterface $entity
+   *   The entity that will be used to get its bundle configuration.
+   * @param string $attribute_key
+   *   The RePEc attribute that is mapped to the field.
    *
    * @return string
-   *   The field value to be used in the RDF template.
+   *   Field name.
    */
-  private function getFieldValue(ContentEntityInterface $entity, $attribute) {
-    return '@todo';
+  private function getAttributeFieldMapping(ContentEntityInterface $entity, $attribute_key) {
+    $field = $this->getEntityBundleSettings($attribute_key, $entity->getEntityTypeId(), $entity->bundle());
+    return $field;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getTemplateFields($templateType) {
+    // @todo extend to other templates via a factory
+    $result = [];
+    switch ($templateType) {
+      case RepecInterface::SERIES_WORKING_PAPER:
+        $result = [
+          'author_name' => t('Author-Name'),
+          'abstract' => t('Abstract'),
+          'creation_date' => t('Creation-Date'),
+          'file_url' => t('File-URL'),
+          'keywords' => t('Keywords'),
+        ];
+        break;
+    }
+    return $result;
   }
 
   /**
@@ -270,20 +349,6 @@ class Repec implements RepecInterface {
         '@file_name' => $fileName,
       ]));
     }
-  }
-
-  /**
-   * Returns the archive directory.
-   *
-   * @return string
-   *   Directory from the public:// file system.
-   */
-  private function getArchiveDirectory() {
-    // @todo check config
-    $basePath = $this->settings->get('base_path');
-    $archiveCode = $this->settings->get('archive_code');
-    $result = 'public://' . $basePath . '/' . $archiveCode . '/';
-    return $result;
   }
 
   /**
@@ -356,26 +421,6 @@ class Repec implements RepecInterface {
       // but currently limited to wpaper.
       RepecInterface::SERIES_WORKING_PAPER => t('Paper series'),
     ];
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getTemplateFields($templateType) {
-    // @todo extend to other templates via a factory
-    $result = [];
-    switch ($templateType) {
-      case RepecInterface::SERIES_WORKING_PAPER:
-        $result = [
-          'author_name' => t('Author-Name'),
-          'abstract' => t('Abstract'),
-          'creation_date' => t('Creation-Date'),
-          'file_url' => t('File-URL'),
-          'keywords' => t('Keywords'),
-        ];
-        break;
-    }
-    return $result;
   }
 
   /**
