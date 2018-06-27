@@ -7,6 +7,7 @@ use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\file\Entity\File;
 
 /**
  * Class Repec.
@@ -227,7 +228,7 @@ class Repec implements RepecInterface {
   }
 
   /**
-   * Maps the value of a field based on the attribute.
+   * Gets the value of a field based on a RePEC attribute.
    *
    * The attribute / field mapping is done via the entity type configuration.
    *
@@ -242,31 +243,39 @@ class Repec implements RepecInterface {
    *   The field values to be used in the RDF template.
    */
   private function getFieldValues(ContentEntityInterface $entity, $attribute_key, $attribute_name) {
-    // @todo append File-Format attribute for files, move this into getFieldValue
     $result = [];
+    $fieldValue = $this->getFieldValueFromAttribute($entity, $attribute_key);
     switch ($attribute_key) {
-      // Files need to append the ...
+      // Files need to append the File-Format and is single valued
+      // so it is limited to the first one.
       case 'file_url':
-        $result[] = [
-          'attribute' => $attribute_name,
-          'value' => $this->getAttributeFieldMapping($entity, $attribute_key),
-        ];
+        $result = $this->getFileAttributes($fieldValue);
         break;
 
       // Authors can be multiple.
       case 'author_name':
         $result[] = [
           'attribute' => $attribute_name,
-          'value' => $this->getAttributeFieldMapping($entity, $attribute_key),
+          'value' => $this->getDefaultAttributeValue($fieldValue),
         ];
         break;
 
-      // @todo creation date fallback to entity created
-      default:
-        // Default to single attribute mapping.
+      // Keywords can be multiple
+      // and are loaded from the taxonomy.
+      case 'keywords':
         $result[] = [
           'attribute' => $attribute_name,
-          'value' => $this->getAttributeFieldMapping($entity, $attribute_key),
+          'value' => $this->getDefaultAttributeValue($fieldValue),
+        ];
+        break;
+
+      // @todo creation date fallback to entity created date
+      // @todo date format
+      default:
+        // Default to single valued attribute mapping.
+        $result[] = [
+          'attribute' => $attribute_name,
+          'value' => $this->getDefaultAttributeValue($fieldValue),
         ];
         break;
     }
@@ -274,19 +283,63 @@ class Repec implements RepecInterface {
   }
 
   /**
-   * Get the mapping between a RePEc attribute and an entity field.
+   * Get the entity field value for a RePEc attribute.
    *
    * @param \Drupal\Core\Entity\ContentEntityInterface $entity
    *   The entity that will be used to get its bundle configuration.
    * @param string $attribute_key
    *   The RePEc attribute that is mapped to the field.
    *
-   * @return string
-   *   Field name.
+   * @return array
+   *   Entity field value.
    */
-  private function getAttributeFieldMapping(ContentEntityInterface $entity, $attribute_key) {
-    $field = $this->getEntityBundleSettings($attribute_key, $entity->getEntityTypeId(), $entity->bundle());
-    return $field;
+  private function getFieldValueFromAttribute(ContentEntityInterface $entity, $attribute_key) {
+    $result = [];
+    $fieldName = $this->getEntityBundleSettings($attribute_key, $entity->getEntityTypeId(), $entity->bundle());
+    if ($entity->hasField($fieldName)) {
+      $result = $entity->get($fieldName)->getValue();
+    }
+    return $result;
+  }
+
+  /**
+   * Get a single valued attribute.
+   *
+   * @param array $fieldValue
+   *   Entity field value.
+   *
+   * @return string
+   *   Attribute value.
+   */
+  private function getDefaultAttributeValue(array $fieldValue) {
+    return empty($fieldValue[0]['value']) ? '' : $fieldValue[0]['value'];
+  }
+
+  /**
+   * Get a RePEc attribute/value pairs for an entity file field value.
+   *
+   * @param array $fieldValue
+   *   Entity field value.
+   *
+   * @return array
+   *   List of attributes/values for a RePEc file.
+   */
+  private function getFileAttributes(array $fieldValue) {
+    $result = [];
+    if (!empty($fieldValue[0]['target_id'])) {
+      $file = File::load($fieldValue[0]['target_id']);
+      $uri = $file->getFileUri();
+      $url = str_replace(' ', '%20', file_create_url($uri));
+      $result[] = [
+        'attribute' => 'File-URL',
+        'value' => $url,
+      ];
+      $result[] = [
+        'attribute' => 'File-Format',
+        'value' => ucfirst($file->getMimeType()),
+      ];
+    }
+    return $result;
   }
 
   /**
@@ -296,6 +349,9 @@ class Repec implements RepecInterface {
     // @todo extend to other templates via a factory
     $result = [];
     switch ($templateType) {
+      // @todo this is a port of the Drupal 7 module review paper template
+      // as there are many more fields:
+      // https://ideas.repec.org/t/papertemplate.html
       case RepecInterface::SERIES_WORKING_PAPER:
         $result = [
           'author_name' => t('Author-Name'),

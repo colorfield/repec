@@ -29,6 +29,7 @@ class NodeTypeSettingsForm extends FormBase {
     ];
     $form_state->setStorage($storage);
 
+    // @todo add date format options
     // @todo check system wide settings first
     $form['enabled'] = [
       '#type' => 'checkbox',
