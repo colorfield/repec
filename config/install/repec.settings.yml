@@ -1,2 +1,1 @@
-repec:
-  base_path: "RePEc"
+base_path: "RePEc"
