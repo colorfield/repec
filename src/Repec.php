@@ -81,8 +81,8 @@ class Repec implements RepecInterface {
 
       // @todo extend to other entity types
       foreach ($this->getEnabledEntityTypeBundles('node_type') as $nodeType) {
-        $entityIds = $this->entityTypeManager->getStorage($nodeType)->loadMultiple();
-        // @todo create templates for each content type
+        // @todo create templates for existing entities, for each content type
+        //$entityIds = $this->entityTypeManager->getStorage($nodeType)->loadMultiple();
       }
     }
     else {
