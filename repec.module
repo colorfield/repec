@@ -33,10 +33,11 @@ function repec_help($route_name, RouteMatchInterface $route_match) {
  * Implements hook_entity_insert().
  */
 function repec_entity_insert(EntityInterface $entity) {
-  assert($entity instanceof ContentEntityInterface);
   /** @var \Drupal\repec\RepecInterface $repec */
   $repec = \Drupal::service('repec');
-  if ($repec->isBundleEnabled($entity)) {
+  // @todo remove limitation to node while covering other entity types
+  if ($entity->getEntityTypeId() === 'node' && $repec->isBundleEnabled($entity)) {
+    assert($entity instanceof ContentEntityInterface);
     $repec->createEntityTemplate($entity, Repec::SERIES_WORKING_PAPER);
   }
 }
@@ -45,10 +46,11 @@ function repec_entity_insert(EntityInterface $entity) {
  * Implements hook_entity_update().
  */
 function repec_entity_update(EntityInterface $entity) {
-  assert($entity instanceof ContentEntityInterface);
   /** @var \Drupal\repec\RepecInterface $repec */
   $repec = \Drupal::service('repec');
-  if ($repec->isBundleEnabled($entity)) {
+  // @todo remove limitation to node while covering other entity types
+  if ($entity->getEntityTypeId() === 'node' && $repec->isBundleEnabled($entity)) {
+    assert($entity instanceof ContentEntityInterface);
     $repec->updateEntityTemplate($entity, Repec::SERIES_WORKING_PAPER);
   }
 }
@@ -57,10 +59,11 @@ function repec_entity_update(EntityInterface $entity) {
  * Implements hook_entity_delete().
  */
 function repec_entity_delete(EntityInterface $entity) {
-  assert($entity instanceof ContentEntityInterface);
   /** @var \Drupal\repec\RepecInterface $repec */
   $repec = \Drupal::service('repec');
-  if ($repec->isBundleEnabled($entity)) {
+  // @todo remove limitation to node while covering other entity types
+  if ($entity->getEntityTypeId() === 'node' && $repec->isBundleEnabled($entity)) {
+    assert($entity instanceof ContentEntityInterface);
     $repec->deleteEntityTemplate($entity, Repec::SERIES_WORKING_PAPER);
   }
 }
