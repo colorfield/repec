@@ -74,14 +74,16 @@ class Repec implements RepecInterface {
         }
       }
 
+      // Site wide templates.
       $this->createArchiveTemplate();
       $this->createSeriesTemplate();
+      $this->allowDirectoryIndex();
 
       // @todo extend to other entity types
       foreach ($this->getEnabledEntityTypeBundles('node_type') as $nodeType) {
-        // @todo for each content type, create entity templates.
+        $entityIds = $this->entityTypeManager->getStorage($nodeType)->loadMultiple();
+        // @todo create templates for each content type
       }
-
     }
     else {
       \Drupal::messenger()->addError(t('Directory @path could not be created.', [
@@ -89,6 +91,30 @@ class Repec implements RepecInterface {
       ]));
     }
 
+  }
+
+  /**
+   * RePEc needs the directory index, override .htaccess directive.
+   */
+  private function allowDirectoryIndex() {
+    $directory = $this->getArchiveDirectory();
+    $fileName = '.htaccess';
+    // @todo needs work
+    $content = <<<EOF
+Options +Indexes
+# Remove the catch-all handler to prevent scripts from being executed.        
+RemoveHandler Drupal_Security_Do_Not_Remove_See_SA_2006_006
+<Files *>
+  # Override the handler again if we're run later in the evaluation list.
+  RemoveHandler Drupal_Security_Do_Not_Remove_See_SA_2013_003
+</Files>
+EOF;
+
+    if (!file_put_contents($directory . '/' . $fileName, $content)) {
+      \Drupal::messenger()->addError(t('File @file_name could not be created', [
+        '@file_name' => $fileName,
+      ]));
+    }
   }
 
   /**
