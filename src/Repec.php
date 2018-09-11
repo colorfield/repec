@@ -82,7 +82,8 @@ class Repec implements RepecInterface {
       // @todo extend to other entity types
       foreach ($this->getEnabledEntityTypeBundles('node_type') as $nodeType) {
         // @todo create templates for existing entities, for each content type
-        //$entityIds = $this->entityTypeManager->getStorage($nodeType)->loadMultiple();
+        // $entityIds = $this->entityTypeManager
+        // ->getStorage($nodeType)->loadMultiple();
       }
     }
     else {
@@ -102,11 +103,12 @@ class Repec implements RepecInterface {
     // @todo needs work
     $content = <<<EOF
 Options +Indexes
-# Remove the catch-all handler to prevent scripts from being executed.        
-RemoveHandler Drupal_Security_Do_Not_Remove_See_SA_2006_006
+# Unset Drupal_Security_Do_Not_Remove_See_SA_2006_006
+SetHandler None
 <Files *>
-  # Override the handler again if we're run later in the evaluation list.
-  RemoveHandler Drupal_Security_Do_Not_Remove_See_SA_2013_003
+  # Unset Drupal_Security_Do_Not_Remove_See_SA_2013_003
+  SetHandler None
+  ForceType text/plain
 </Files>
 EOF;
 
