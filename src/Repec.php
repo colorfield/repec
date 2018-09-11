@@ -125,8 +125,9 @@ EOF;
   public function getArchiveTemplate() {
     // @todo use hook_repec_archive_mapping
     $url = $this->settings->get('provider_homepage');
+    $url .= '/sites/default/files';
     $url .= '/' . $this->settings->get('base_path');
-    $url .= '/' . $this->settings->get('archive_code');
+    $url .= '/' . $this->settings->get('archive_code') . '/';
     return [
       [
         'attribute' => 'Template-type',
