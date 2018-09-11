@@ -1,7 +1,8 @@
 name: 'RePEc'
 type: module
-description: 'RDF integration with Research Papers in Economics (RePEc)'
+description: 'RDF integration with Research Papers in Economics (RePEc).'
 core: 8.x
+configure: repec.settings
 package: 'Web services'
 dependencies:
-  - rdf
+  - drupal:rdf
