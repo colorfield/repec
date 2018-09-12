@@ -17,6 +17,7 @@ it will produce the series template (*seri.rdf file)
 
 ## Roadmap
 
+- Warn users prior to uninstall that the templates will be removed.
 - Provide an option per content type to create templates based on a per entity
 flag (use case: share with RePEc a subset of entities, not all of them).
 
