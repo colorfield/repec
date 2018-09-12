@@ -8,6 +8,7 @@
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\ContentEntityInterface;
+use Drupal\node\Entity\Node;
 use Drupal\repec\Repec;
 
 /**
@@ -37,8 +38,10 @@ function repec_entity_insert(EntityInterface $entity) {
   $repec = \Drupal::service('repec');
   // @todo remove limitation to node while covering other entity types
   if ($entity->getEntityTypeId() === 'node' && $repec->isBundleEnabled($entity)) {
-    assert($entity instanceof ContentEntityInterface);
-    $repec->createEntityTemplate($entity, Repec::SERIES_WORKING_PAPER);
+    assert($entity instanceof Node);
+    if ($entity->isPublished()) {
+      $repec->createEntityTemplate($entity, Repec::SERIES_WORKING_PAPER);
+    }
   }
 }
 
@@ -50,8 +53,13 @@ function repec_entity_update(EntityInterface $entity) {
   $repec = \Drupal::service('repec');
   // @todo remove limitation to node while covering other entity types
   if ($entity->getEntityTypeId() === 'node' && $repec->isBundleEnabled($entity)) {
-    assert($entity instanceof ContentEntityInterface);
-    $repec->updateEntityTemplate($entity, Repec::SERIES_WORKING_PAPER);
+    assert($entity instanceof Node);
+    if ($entity->isPublished()) {
+      $repec->updateEntityTemplate($entity, Repec::SERIES_WORKING_PAPER);
+    }
+    else {
+      $repec->deleteEntityTemplate($entity);
+    }
   }
 }
 
@@ -63,8 +71,8 @@ function repec_entity_delete(EntityInterface $entity) {
   $repec = \Drupal::service('repec');
   // @todo remove limitation to node while covering other entity types
   if ($entity->getEntityTypeId() === 'node' && $repec->isBundleEnabled($entity)) {
-    assert($entity instanceof ContentEntityInterface);
-    $repec->deleteEntityTemplate($entity, Repec::SERIES_WORKING_PAPER);
+    assert($entity instanceof Node);
+    $repec->deleteEntityTemplate($entity);
   }
 }
 

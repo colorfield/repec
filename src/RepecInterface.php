@@ -126,10 +126,8 @@ interface RepecInterface {
    *
    * @param \Drupal\Core\Entity\ContentEntityInterface $entity
    *   The entity that is the subject of the template.
-   * @param int $templateType
-   *   The template type.
    */
-  public function deleteEntityTemplate(ContentEntityInterface $entity, $templateType);
+  public function deleteEntityTemplate(ContentEntityInterface $entity);
 
   /**
    * Get RePEc series.

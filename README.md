@@ -19,7 +19,6 @@ it will produce the series template (*seri.rdf file)
 
 To have a first release:
 
-- Delete the Working Paper template when an entity is marked as unpublished
 - Provide an option per content type to create templates based on a per entity
 flag (use case: share with RePEc a subset of entities, not all of them)
 - On uninstall, delete all the RePEc templates.

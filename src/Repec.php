@@ -43,7 +43,7 @@ class Repec implements RepecInterface {
   private $settings;
 
   /**
-   * Constructs a new Repec object.
+   * Constructs a new RePEc object.
    */
   public function __construct(EntityTypeManagerInterface $entity_type_manager, FileSystemInterface $file_system, ConfigFactoryInterface $config_factory) {
     $this->entityTypeManager = $entity_type_manager;
@@ -535,6 +535,42 @@ EOF;
   }
 
   /**
+   * {@inheritdoc}
+   */
+  public function createEntityTemplate(ContentEntityInterface $entity, $templateType) {
+    // @todo based on the bundle configuration, select series
+    // via a factory to get the right template.
+    // Currently limiting it to the Working Paper series.
+    $this->createPaperTemplate($entity);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function updateEntityTemplate(ContentEntityInterface $entity, $templateType) {
+    // Barely re-create the entity template.
+    $this->createEntityTemplate($entity, $templateType);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function deleteEntityTemplate(ContentEntityInterface $entity) {
+    $serieDirectoryConfig = $this->getEntityBundleSettings('serie_directory', $entity->getEntityTypeId(), $entity->bundle());
+    $directory = $this->getArchiveDirectory() . $serieDirectoryConfig . '/';
+    if (!empty($directory)) {
+      $fileName = $serieDirectoryConfig . '_' . $entity->getEntityTypeId() . '_' . $entity->id() . '.rdf';
+      $filePath = $directory . '/' . $fileName;
+      file_unmanaged_delete($filePath);
+    }
+    else {
+      \Drupal::messenger()->addError(t('The directory @path is empty.', [
+        '@path' => $directory,
+      ]));
+    }
+  }
+
+  /**
    * Maps the series fields with the node fields to create the template file.
    *
    * @param \Drupal\Core\Entity\ContentEntityInterface $entity
@@ -567,32 +603,6 @@ EOF;
         '@path' => $directory,
       ]));
     }
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function createEntityTemplate(ContentEntityInterface $entity, $templateType) {
-    // @todo based on the bundle configuration, select series
-    // via a factory to get the right template.
-    // Currently limiting it to wpaper series.
-    $this->createPaperTemplate($entity);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function updateEntityTemplate(ContentEntityInterface $entity, $templateType) {
-    // @todo delete should be runned when entity is unpublished
-    // Otherwise, barely re-create the entity template.
-    $this->createEntityTemplate($entity, $templateType);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function deleteEntityTemplate(ContentEntityInterface $entity, $templateType) {
-    // @todo implement
   }
 
   /**
