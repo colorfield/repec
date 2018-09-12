@@ -55,6 +55,17 @@ class Repec implements RepecInterface {
   /**
    * {@inheritdoc}
    */
+  public function getArchiveDirectory() {
+    // @todo check config
+    $basePath = $this->settings->get('base_path');
+    $archiveCode = $this->settings->get('archive_code');
+    $result = 'public://' . $basePath . '/' . $archiveCode . '/';
+    return $result;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function initializeTemplates() {
     $basePath = $this->settings->get('base_path');
     if (empty($basePath)) {
@@ -240,20 +251,6 @@ EOF;
         $result[] = $fieldValue;
       }
     }
-    return $result;
-  }
-
-  /**
-   * Returns the archive directory.
-   *
-   * @return string
-   *   Directory from the public:// file system.
-   */
-  private function getArchiveDirectory() {
-    // @todo check config
-    $basePath = $this->settings->get('base_path');
-    $archiveCode = $this->settings->get('archive_code');
-    $result = 'public://' . $basePath . '/' . $archiveCode . '/';
     return $result;
   }
 

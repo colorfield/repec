@@ -15,15 +15,10 @@ that are used for the archive template (*arch.rdf file)
 it will produce the series template (*seri.rdf file)
 - Working Paper templates are then generated/updated while saving entities.
 
-## Issues left
-
-To have a first release:
+## Roadmap
 
 - Provide an option per content type to create templates based on a per entity
-flag (use case: share with RePEc a subset of entities, not all of them)
-- On uninstall, delete all the RePEc templates.
-
-## Roadmap
+flag (use case: share with RePEc a subset of entities, not all of them).
 
 The current version has limitations, so the following improvements
 can be considered:

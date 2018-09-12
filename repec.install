@@ -1,0 +1,15 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the RePEc module.
+ */
+
+/**
+ * Implements hook_uninstall().
+ */
+function repec_uninstall() {
+  /** @var \Drupal\repec\RepecInterface $repec */
+  $repec = \Drupal::service('repec');
+  file_unmanaged_delete_recursive($repec->getArchiveDirectory());
+}

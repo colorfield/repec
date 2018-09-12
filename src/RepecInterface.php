@@ -18,6 +18,14 @@ interface RepecInterface {
   const SERIES_WORKING_PAPER = 'wpaper';
 
   /**
+   * Returns the archive directory.
+   *
+   * @return string
+   *   Directory from the public:// file system.
+   */
+  public function getArchiveDirectory();
+
+  /**
    * Initializes the RePEc directory/file structure based on the configuration.
    *
    * Creates the archive code directory, creates the archive and series
