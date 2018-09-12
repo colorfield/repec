@@ -203,6 +203,7 @@ EOF;
       ],
       [
         'attribute' => 'Handle',
+        // @todo get from bundle series configuration.
         'value' => 'RePEc:' . $this->settings->get('archive_code') . ':wpaper',
       ],
     ];

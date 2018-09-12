@@ -68,10 +68,17 @@ class NodeTypeSettingsForm extends FormBase {
     $form['serie_directory'] = [
       '#type' => 'textfield',
       '#title' => t('Templates directory for this serie'),
-      '#description' => t('It must have exactly six letters (example: wpaper).'),
+      '#description' => t('It must have exactly six letters. Currently limited to Working Paper so defaulting to "wpaper"'),
       '#maxlength' => 6,
       '#size' => 6,
-      '#default_value' => $repec->getEntityBundleSettings('serie_directory', 'node', $node_type),
+      // The serie_directory is currently not configurable because
+      // it is hardcoded as a default value in the
+      // RepecInterface::getSeriesTemplate()
+      // due to the current limitation to working papers.
+      // '#default_value' => $repec->getEntityBundleSettings
+      // ('serie_directory', 'node', $node_type),.
+      '#default_value' => 'wpaper',
+      '#disabled' => TRUE,
       '#states' => [
         'visible' => [
           ':input[name="enabled"]' => ['checked' => TRUE],
