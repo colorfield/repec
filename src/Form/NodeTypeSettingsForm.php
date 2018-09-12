@@ -77,7 +77,7 @@ class NodeTypeSettingsForm extends FormBase {
       // due to the current limitation to working papers.
       // '#default_value' => $repec->getEntityBundleSettings
       // ('serie_directory', 'node', $node_type),.
-      '#default_value' => 'wpaper',
+      '#default_value' => RepecInterface::SERIES_WORKING_PAPER,
       '#disabled' => TRUE,
       '#states' => [
         'visible' => [
