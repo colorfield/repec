@@ -155,9 +155,24 @@ interface RepecInterface {
    *   The entity that is the subject of the template.
    *
    * @return bool
-   *   Is the entity RePEc enabled.
+   *   Is the entity bundle enabled for RePEc.
    */
   public function isBundleEnabled(ContentEntityInterface $entity);
+
+  /**
+   * Checks if an entity can be shared with RePEc.
+   *
+   * This is a wrapper for various checks depending on the several possible
+   * conditions to share a template: published, per entity configuration,
+   * content access, ...
+   *
+   * @param \Drupal\Core\Entity\ContentEntityInterface $entity
+   *   The entity that is the subject of the template.
+   *
+   * @return bool
+   *   Is the entity be shareable on RePEc.
+   */
+  public function isEntityShareable(ContentEntityInterface $entity);
 
   /**
    * Returns RePEc's settings for an entity type bundle.

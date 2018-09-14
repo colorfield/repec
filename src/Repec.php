@@ -8,6 +8,7 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\file\Entity\File;
+use Drupal\node\Entity\Node;
 
 /**
  * Class Repec.
@@ -619,6 +620,18 @@ EOF;
    */
   public function isBundleEnabled(ContentEntityInterface $entity) {
     return $this->getEntityBundleSettings('enabled', $entity->getEntityTypeId(), $entity->bundle());
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function isEntityShareable(ContentEntityInterface $entity) {
+    $result = FALSE;
+    if ($entity instanceof Node && $entity->isPublished()) {
+      $result = TRUE;
+    }
+    // @todo check optional field restriction
+    return $result;
   }
 
   /**

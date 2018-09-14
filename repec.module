@@ -39,7 +39,7 @@ function repec_entity_insert(EntityInterface $entity) {
   // @todo remove limitation to node while covering other entity types
   if ($entity->getEntityTypeId() === 'node' && $repec->isBundleEnabled($entity)) {
     assert($entity instanceof Node);
-    if ($entity->isPublished()) {
+    if ($repec->isEntityShareable($entity)) {
       $repec->createEntityTemplate($entity, Repec::SERIES_WORKING_PAPER);
     }
   }
@@ -54,7 +54,7 @@ function repec_entity_update(EntityInterface $entity) {
   // @todo remove limitation to node while covering other entity types
   if ($entity->getEntityTypeId() === 'node' && $repec->isBundleEnabled($entity)) {
     assert($entity instanceof Node);
-    if ($entity->isPublished()) {
+    if ($repec->isEntityShareable($entity)) {
       $repec->updateEntityTemplate($entity, Repec::SERIES_WORKING_PAPER);
     }
     else {
