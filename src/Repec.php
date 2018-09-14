@@ -112,7 +112,7 @@ class Repec implements RepecInterface {
   private function allowDirectoryIndex() {
     $directory = $this->getArchiveDirectory();
     $fileName = '.htaccess';
-    // @todo needs work
+    // @todo needs security review
     $content = <<<EOF
 Options +Indexes
 # Unset Drupal_Security_Do_Not_Remove_See_SA_2006_006
@@ -281,17 +281,20 @@ EOF;
         break;
 
       // Authors can be multiple.
-      // @todo the Drupal 7 module handled the first author only
-      // the way the template is written needs to be adjusted
-      // to allow several authors: currently, the Author-Name is
-      // an indexed key from an array so it does not allow
-      // multiple values with the same index.
+      // @todo they can also have multiple attributes
+      // currently limiting to Author-Name by default. Author-Name-First,
+      // Author-Name-Last, Author-Email, Author-Workplace-Name can also
+      // be provided as RePEc template attributes, see
+      // https://ideas.repec.org/t/papertemplate.html
+      // See issue #3 https://github.com/r-daneelolivaw/repec/issues/3
       case 'author_name':
-        // $result = $this->getAuthorAttributes($fieldValue);
-        $result[] = [
-          'attribute' => $attribute_name,
-          'value' => $this->getAuthorAttributes($fieldValue)[0][$attribute_name],
-        ];
+        $authors = $this->getAuthorAttributes($fieldValue);
+        foreach ($authors as $author) {
+          $result[] = [
+            'attribute' => $attribute_name,
+            'value' => $author,
+          ];
+        }
         break;
 
       // Abstract needs post-processing.
@@ -433,10 +436,14 @@ EOF;
    */
   private function getAuthorAttributes(array $field_value) {
     $result = [];
+    // @see issue #3 https://github.com/r-daneelolivaw/repec/issues/3
     // @todo this field can be from several types (user reference, text, ...)
-    // going for the user reference by default.
-    // This needs at least a field validation during field mapping on the
-    // entity type settings form.
+    // The author field set from the bundle configuration could be from several
+    // types (user reference, text, ...).
+    // The current implementation assumes that user reference type
+    // is the default.
+    // This needs at least a field validation during the field mapping on the
+    // bundle settings form, then coverage for other types.
     try {
       // Could be replaced by field->referencedEntities but needs refactoring
       // to get field instead of fieldValue from getFieldValues().
@@ -453,9 +460,7 @@ EOF;
           // can be fetched from first name / last name instead of
           // the username and can produce other attributes like
           // Author-Name-First and Author-Name-Last
-          $result[] = [
-            'Author-Name' => $user->getUsername(),
-          ];
+          $result[] = $user->getUsername();
         }
       }
     }
@@ -587,7 +592,9 @@ EOF;
 
       $content = '';
       foreach ($template as $item) {
-        $content .= $item['attribute'] . ': ' . $item['value'] . "\n";
+        if (!empty($item['value'])) {
+          $content .= $item['attribute'] . ': ' . $item['value'] . "\n";
+        }
       }
 
       if (!file_put_contents($directory . '/' . $fileName, $content)) {
