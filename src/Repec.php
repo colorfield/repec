@@ -630,7 +630,14 @@ EOF;
     if ($entity instanceof Node && $entity->isPublished()) {
       $result = TRUE;
     }
-    // @todo check optional field restriction
+    // If a restriction is configured for this bundle,
+    // get the field that is used for the restriction,
+    // then get the entity field value.
+    $hasRestriction = $this->getEntityBundleSettings('restriction_by_field', $entity->getEntityTypeId(), $entity->bundle()) === 1;
+    if($hasRestriction) {
+      $restrictionField = $this->getEntityBundleSettings('restriction_field', $entity->getEntityTypeId(), $entity->bundle());
+      $result = $entity->get($restrictionField)->getValue()[0]['value'] === 1;
+    }
     return $result;
   }
 
