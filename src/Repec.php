@@ -634,7 +634,7 @@ EOF;
     // get the field that is used for the restriction,
     // then get the entity field value.
     $hasRestriction = $this->getEntityBundleSettings('restriction_by_field', $entity->getEntityTypeId(), $entity->bundle()) === 1;
-    if($hasRestriction) {
+    if ($hasRestriction) {
       $restrictionField = $this->getEntityBundleSettings('restriction_field', $entity->getEntityTypeId(), $entity->bundle());
       $result = $entity->get($restrictionField)->getValue()[0]['value'] === 1;
     }
