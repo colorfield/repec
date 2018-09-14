@@ -37,7 +37,16 @@ class NodeTypeSettingsForm extends FormBase {
       '#default_value' => $repec->getEntityBundleSettings('enabled', 'node', $node_type),
     ];
 
-    $form['serie_type'] = [
+    $form['serie'] = [
+      '#type' => 'fieldset',
+      '#title' => $this->t('Serie'),
+      '#states' => [
+        'visible' => [
+          ':input[name="enabled"]' => ['checked' => TRUE],
+        ],
+      ],
+    ];
+    $form['serie']['serie_type'] = [
       '#type' => 'select',
       '#title' => t('Series'),
       '#options' => $repec->availableSeries(),
@@ -51,7 +60,7 @@ class NodeTypeSettingsForm extends FormBase {
         ],
       ],
     ];
-    $form['serie_name'] = [
+    $form['serie']['serie_name'] = [
       '#type' => 'textfield',
       '#title' => t('Serie name'),
       '#description' => t('Name for the serie (example: Working Paper).'),
@@ -65,7 +74,7 @@ class NodeTypeSettingsForm extends FormBase {
         ],
       ],
     ];
-    $form['serie_directory'] = [
+    $form['serie']['serie_directory'] = [
       '#type' => 'textfield',
       '#title' => t('Templates directory for this serie'),
       '#description' => t('It must have exactly six letters. Currently limited to Working Paper so defaulting to "wpaper"'),
@@ -89,6 +98,42 @@ class NodeTypeSettingsForm extends FormBase {
       ],
     ];
 
+    $form['restriction'] = [
+      '#type' => 'fieldset',
+      '#title' => $this->t('Optional restriction'),
+      '#states' => [
+        'visible' => [
+          ':input[name="enabled"]' => ['checked' => TRUE],
+        ],
+      ],
+    ];
+    $form['restriction']['restriction_by_field'] = [
+      '#type' => 'checkbox',
+      '#title' => t('Limit shared entities by field'),
+      '#description' => t('While enabled, allows to evaluate a boolean field to share the entity on RePEc or not.'),
+      '#default_value' => $repec->getEntityBundleSettings('restriction_by_field', 'node', $node_type),
+      '#states' => [
+        'visible' => [
+          ':input[name="enabled"]' => ['checked' => TRUE],
+        ],
+      ],
+    ];
+    $form['restriction']['restriction_field'] = [
+      '#type' => 'select',
+      '#title' => 'Restriction field',
+      '#description' => t('Select the boolean field that will be used to post on RePEc.'),
+      '#options' => $this->getBooleanFields('node', $node_type),
+      '#default_value' => $repec->getEntityBundleSettings('restriction_field', 'node', $node_type),
+      '#states' => [
+        'visible' => [
+          ':input[name="restriction_by_field"]' => ['checked' => TRUE],
+        ],
+        'required' => [
+          ':input[name="restriction_by_field"]' => ['checked' => TRUE],
+        ],
+      ],
+    ];
+
     $bundleFields = \Drupal::entityManager()->getFieldDefinitions('node', $node_type);
     $fieldOptions = [];
     foreach ($bundleFields as $fieldName => $fieldDefinition) {
@@ -101,8 +146,17 @@ class NodeTypeSettingsForm extends FormBase {
 
     $repecTemplateFields = $repec->getTemplateFields(RepecInterface::SERIES_WORKING_PAPER);
 
+    $form['template_field_mapping'] = [
+      '#type' => 'fieldset',
+      '#title' => $this->t('Template field mapping'),
+      '#states' => [
+        'visible' => [
+          ':input[name="enabled"]' => ['checked' => TRUE],
+        ],
+      ],
+    ];
     foreach ($repecTemplateFields as $fieldKey => $fieldLabel) {
-      $form[$fieldKey] = [
+      $form['template_field_mapping'][$fieldKey] = [
         '#type' => 'select',
         '#title' => $fieldLabel,
         '#options' => $fieldOptions,
@@ -126,6 +180,21 @@ class NodeTypeSettingsForm extends FormBase {
     ];
 
     return $form;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  private function getBooleanFields($entity_type_id, $bundle) {
+    $result = [];
+    $bundleFields = \Drupal::entityManager()->getFieldDefinitions($entity_type_id, $bundle);
+    /** @var \Drupal\Core\Field\FieldDefinitionInterface $fieldDefinition */
+    foreach ($bundleFields as $fieldName => $fieldDefinition) {
+      if (!empty($fieldDefinition->getTargetBundle()) && $fieldDefinition->getType() === 'boolean') {
+        $result[$fieldName] = $fieldDefinition->getLabel();
+      }
+    }
+    return $result;
   }
 
   /**

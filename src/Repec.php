@@ -688,6 +688,8 @@ EOF;
       'serie_type',
       'serie_name',
       'serie_directory',
+      'restriction_by_field',
+      'restriction_field',
       'author_name',
       'abstract',
       'creation_date',
@@ -705,6 +707,8 @@ EOF;
     $defaults['serie_type'] = '';
     $defaults['serie_name'] = '';
     $defaults['serie_directory'] = '';
+    $defaults['restriction_by_field'] = '';
+    $defaults['restriction_field'] = '';
     $defaults['author_name'] = '';
     $defaults['abstract'] = '';
     $defaults['creation_date'] = '';
